@@ -28,7 +28,7 @@ public class ReservaController {
 	private IReservevaService reservaService;
 	
 	
-	@SqsListener("https://sqs.us-east-1.amazonaws.com/585780553964/sprint-boot-sqs")
+	@SqsListener("${cloud.aws.end-point.uri}")
 	public void getProductoFromSQS(String snsMessageJsonFormat) {
 		Gson gson = new Gson();
 		Reserva reserva = gson.fromJson(snsMessageJsonFormat, Reserva.class);

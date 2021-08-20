@@ -1,7 +1,9 @@
 package com.rocha.app.reservas.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
@@ -10,8 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
-import com.rocha.app.reservas.exceptions.ResourceNotFoundException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.rocha.app.commons.model.Reserva;
+import com.rocha.app.reservas.exceptions.ResourceNotFoundException;
 import com.rocha.app.reservas.service.IReservevaService;
 import com.rocha.app.reservas.service.ISendEmail;
 
@@ -42,11 +45,31 @@ public class ReservaController {
 		}
 	}
 	
-	
+	@HystrixCommand(fallbackMethod = "reservasAlternativa")
 	@GetMapping("/reservas")
 	public List<Reserva> reservas(){
 		return  reservaService.findAll();
 	}
+	
+	
+	public List<Reserva> reservasAlternativa(){
+		
+		List<Reserva> listReserva = new ArrayList<>();
+		Reserva r = new Reserva();
+		
+		r.setEmail("rocha7778@hotmail.com");
+		r.setId(Long.valueOf("1"));
+		r.setNoHabitaciones(1);
+		r.setNoMenores(3);
+		r.setNoPersonas(5);
+		r.setTitularReserva("Rocha");
+		r.setTotalDias(10);
+		r.setFechaIngreso(LocalDate.parse("2021-01-01").toDate());
+		r.setFechaSalida(LocalDate.parse("2021-01-30").toDate());
+		listReserva.add(r);
+		return  listReserva;
+	}
+	
 	
 	@GetMapping("/reservas/{id}")
 	public Reserva reserva(@PathVariable long id) throws ResourceNotFoundException {
